@@ -1,0 +1,7 @@
+<button @click="addChat">Add a chat</button>
+<ul>
+    <li v-for="chat in chats" :key="chat">
+        <router-link :to="`/chat/${chat}`">Chat {{ chat }}</router-link>
+        
+    </li>
+</ul>
