@@ -1,7 +1,16 @@
-<button @click="addChat">Add a chat</button>
-<ul>
-    <li v-for="chat in chats" :key="chat">
-        <router-link :to="`/chat/${chat}`">Chat {{ chat }}</router-link>
-        
-    </li>
-</ul>
+<link rel="stylesheet" href="chat.css" />
+<div class="app-container">
+  <div class="main-content">
+    <button @click="addChat" class="add-chat-btn">add a chat</button>
+    <ul class="chat-list">
+      <li v-for="chat in chats" :key="chat" class="chat-item">
+        <router-link :to="`/chat/${chat}`" class="chat-link"
+          >chat {{ chat }}</router-link
+        >
+        <button @click="deleteChat(chat)" class="delete-chat-btn">❌</button>
+      </li>
+    </ul>
+    <p>a wild cat appeared!</p>
+    <img src="webcat.png" />
+  </div>
+</div>

@@ -1,25 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Routing</title>
-        <script type="importmap">
-            {
-                "imports": {
-                    "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.js",
-                    "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.5.0/dist/vue-router.esm-browser.prod.js"
-                }
-            }
-        </script>
-    </head>
-    <body>
-      <div id="app">
-        <h1>
-          <router-link to="/">Go Home</router-link>
-        </h1>
-        <router-view></router-view>
-      </div>
-      <script src="index.js" type="module"></script>
-    </body>
-    </html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pigeon</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.js",
+          "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.5.0/dist/vue-router.esm-browser.prod.js"
+        }
+      }
+    </script>
+    <link rel="icon" href="pidove.png" />
+    <link rel="stylesheet" href="chat.css" />
+  </head>
+  <body>
+    <div id="app">
+      <h1>
+        <router-link to="/"> 🕊 </router-link>
+      </h1>
+      <div class="current-time" id="clock"></div>
+      <nav>
+        <router-link to="/">Home</router-link>
+        <router-link to="/profile">Profile</router-link>
+        <router-link to="/todo">Todo List</router-link>
+      </nav>
+
+      <router-view></router-view>
+    </div>
+    <script>
+      function updateClock() {
+        document.getElementById("clock").textContent =
+          "it's " + new Date().toLocaleTimeString() + " :)";
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+    </script>
+    <script src="index.js" type="module"></script>
+  </body>
+</html>

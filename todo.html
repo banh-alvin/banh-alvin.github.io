@@ -1,0 +1,48 @@
+<div class="todo-container">
+  <h2>Todo List</h2>
+
+  <div class="todo-input">
+    <input
+      type="text"
+      v-model="newTodo"
+      @keyup.enter="addTodo"
+      placeholder="add a new task..."
+    />
+    <button @click="addTodo">add</button>
+  </div>
+
+  <ul class="todo-list">
+    <li
+      v-for="(todo, index) in todos"
+      :key="todo.id"
+      class="todo-item"
+      :class="{ 'completed': todo.completed }"
+    >
+      <div v-if="editingIndex !== index" class="todo-view">
+        <input
+          type="checkbox"
+          :checked="todo.completed"
+          @change="toggleComplete(index)"
+        />
+        <span class="todo-text">{{ todo.text }}</span>
+        <div class="todo-actions">
+          <button @click="startEdit(index)" class="edit-btn">✍️</button>
+          <button @click="deleteTodo(index)" class="delete-btn">❌</button>
+        </div>
+      </div>
+
+      <div v-else class="todo-edit">
+        <input
+          type="text"
+          v-model="editValue"
+          @keyup.enter="saveEdit"
+          @keyup.esc="cancelEdit"
+        />
+        <div class="todo-edit-actions">
+          <button @click="saveEdit" class="save-btn">✅</button>
+          <button @click="cancelEdit" class="cancel-btn">❌</button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

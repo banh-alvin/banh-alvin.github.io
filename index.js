@@ -1,8 +1,9 @@
-import { createApp } from "vue";
+import { createApp, defineAsyncComponent } from "vue";
 import { createRouter, createWebHashHistory } from "vue-router";
 import { ChatList } from "./chat-list.js";
 import { Chat } from "./chat.js";
 import { Profile } from "./profile.js";
+import { Todo } from "./todo.js";
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -10,15 +11,15 @@ const router = createRouter({
     { path: "/", component: ChatList },
     { path: "/chat/:chatId", component: Chat, props: true },
     { path: "/profile", component: Profile },
+    { path: "/todo", component: Todo },
   ],
 });
 
-const app = createApp({
+createApp({
   components: {
-    ChatList,
-    Chat,
-    Profile,
+    ChatList: defineAsyncComponent(ChatList),
+    Todo: defineAsyncComponent(Todo),
   },
-});
-
-app.use(router).mount("#app");
+})
+  .use(router)
+  .mount("#app");
