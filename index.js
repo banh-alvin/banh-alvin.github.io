@@ -4,6 +4,7 @@ import { ChatList } from "./chat-list.js";
 import { Chat } from "./chat.js";
 import { Profile } from "./profile.js";
 import { Todo } from "./todo.js";
+import { GraffitiPlugin, GraffitiRemote } from "graffiti";
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -18,8 +19,11 @@ const router = createRouter({
 createApp({
   components: {
     ChatList: defineAsyncComponent(ChatList),
-    Todo: defineAsyncComponent(Todo),
   },
 })
   .use(router)
+  .use(GraffitiPlugin, {
+    // graffiti: new GraffitiLocal(),
+    graffiti: new GraffitiRemote(),
+  })
   .mount("#app");

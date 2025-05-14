@@ -1,70 +1,67 @@
 <div class="profile-container">
   <h2>user profile</h2>
-
+  
   <div v-if="!editing" class="profile-view">
-    <img
-      :src="profile.avatarUrl || 'https://via.placeholder.com/150'"
-      alt="Profile picture"
-      class="profile-pic"
-    />
+    <img :src="profile.avatarUrl || 'https://via.placeholder.com/150'" alt="profile picture" class="profile-pic">
     <div class="profile-details">
       <h3>{{ profile.name }}</h3>
       <p>{{ profile.email }}</p>
       <p>member since: {{ profile.memberSince }}</p>
       <p v-if="profile.bio">{{ profile.bio }}</p>
     </div>
-    <button @click="startEditing" class="edit-button">✍️</button>
-  </div>
-
-  <form v-else @submit.prevent="saveProfile" class="profile-form">
-    <div class="form-group profile-pic-upload">
-      <img
-        :src="previewImage || editedProfile.avatarUrl || 'https://via.placeholder.com/150'"
-        alt="Profile picture"
-        class="profile-pic"
-      />
-      <div class="upload-controls">
-        <label for="profile-pic-input" class="upload-button">
-          <u>Choose Photo</u>
-          <input
-            type="file"
-            id="profile-pic-input"
-            @change="handleImageUpload"
-            accept="image/*"
-            style="display: none"
-          />
-        </label>
-        <button
-          type="button"
-          v-if="previewImage"
-          @click="cancelImageUpload"
-          class="cancel-upload-button"
-        >
-          ❌
+    <div class="profile-actions">
+      <button @click="startEditing" class="edit-button">edit profile</button>
+      
+      <div class="solid-actions">
+        <button v-if="!solidLoggedIn" @click="loginWithSolid" class="solid-login-btn">
+          login with solid
+        </button>
+        <button v-else @click="logoutFromSolid" class="solid-logout-btn">
+          logout from solid
         </button>
       </div>
+      
+      <div v-if="solidLoggedIn" class="solid-status">
+        <p>connected to solid ✓</p>
+      </div>
     </div>
-
-    <div class="form-group">
-      <label for="name">Name</label>
-      <input type="text" id="name" v-model="editedProfile.name" required />
+  </div>
+  
+  <form v-else @submit.prevent="saveProfile" class="profile-form">
+    <div class="form-group profile-pic-upload">
+      <img :src="previewImage || editedProfile.avatarUrl || 'https://via.placeholder.com/150'" alt="profile picture" class="profile-pic">
+      <div class="upload-controls">
+        <label for="profile-pic-input" class="upload-button">
+          choose photo
+          <input 
+            type="file" 
+            id="profile-pic-input" 
+            @change="handleImageUpload" 
+            accept="image/*"
+            style="display: none;">
+        </label>
+        <button type="button" v-if="previewImage" @click="cancelImageUpload" class="cancel-upload-button">remove</button>
+      </div>
     </div>
-
+    
     <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" v-model="editedProfile.email" required />
+      <label for="name">name</label>
+      <input type="text" id="name" v-model="editedProfile.name" required>
     </div>
-
+    
     <div class="form-group">
-      <label for="bio">Bio</label>
+      <label for="email">email</label>
+      <input type="email" id="email" v-model="editedProfile.email" required>
+    </div>
+    
+    <div class="form-group">
+      <label for="bio">bio</label>
       <textarea id="bio" v-model="editedProfile.bio" rows="3"></textarea>
     </div>
-
+    
     <div class="form-actions">
-      <button type="submit" class="save-button">✅</button>
-      <button type="button" @click="cancelEditing" class="cancel-button">
-        ❌
-      </button>
+      <button type="submit" class="save-button">save changes</button>
+      <button type="button" @click="cancelEditing" class="cancel-button">cancel</button>
     </div>
   </form>
 </div>
