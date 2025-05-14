@@ -7,9 +7,11 @@
     <script type="importmap">
       {
         "imports": {
-          "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.js",
+          "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.13/dist/vue.esm-browser.prod.js",
           "vue-router": "https://cdn.jsdelivr.net/npm/vue-router@4.5.0/dist/vue-router.esm-browser.prod.js",
-          "graffiti": "https://designftw.github.io/graffiti/graffiti.esm.js"
+          "@graffiti-garden/implementation-local": "https://cdn.jsdelivr.net/npm/@graffiti-garden/implementation-local@0.6.4/dist/browser/index.js",
+          "@graffiti-garden/implementation-remote": "https://cdn.jsdelivr.net/npm/@graffiti-garden/implementation-remote@0.6.2/dist/browser/index.js",
+          "@graffiti-garden/wrapper-vue": "https://cdn.jsdelivr.net/npm/@graffiti-garden/wrapper-vue@0.7.2/dist/browser/plugin.mjs"
         }
       }
     </script>
@@ -17,25 +19,15 @@
     <link rel="stylesheet" href="chat.css" />
   </head>
   <body>
-    <div id="app">
-      <h1>
-        <router-link to="/"> 🕊 </router-link>
-      </h1>
-      <div class="current-time" id="clock"></div>
-      <nav>
-        <router-link to="/">Home</router-link>
-        <router-link to="/profile">Profile</router-link>
-        <router-link to="/todo">Todo List</router-link>
-      </nav>
-
-      <router-view></router-view>
-    </div>
+    <div id="app"></div>
     <script>
       function updateClock() {
-        document.getElementById("clock").textContent =
-          "it's " + new Date().toLocaleTimeString() + " :)";
+        const element = document.getElementById("clock");
+        if (element) {
+          element.textContent =
+            "it's " + new Date().toLocaleTimeString() + " :)";
+        }
       }
-      updateClock();
       setInterval(updateClock, 1000);
     </script>
     <script src="index.js" type="module"></script>

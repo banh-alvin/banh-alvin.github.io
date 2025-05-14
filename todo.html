@@ -25,6 +25,12 @@
           @change="toggleComplete(index)"
         />
         <span class="todo-text">{{ todo.text }}</span>
+        <span
+          v-if="todo.source && todo.source.type === 'chat'"
+          class="todo-source"
+        >
+          from chat {{ todo.source.chatId }}
+        </span>
         <div class="todo-actions">
           <button @click="startEdit(index)" class="edit-btn">✍️</button>
           <button @click="deleteTodo(index)" class="delete-btn">❌</button>

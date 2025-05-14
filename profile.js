@@ -1,32 +1,99 @@
-
+// UPDATED profile.js with login integration
 export async function Profile() {
   return {
     data() {
       return {
         editing: false,
         previewImage: null,
-        profile: this.loadProfile(),
+        profile: {
+          name: "pigeon pigeon",
+          email: "pigeonandplans@gmail.com",
+          memberSince: "since the ice age",
+          bio: "bleh",
+          avatarUrl: "pidove.png",
+        },
         editedProfile: {},
-        solidLoggedIn: false
+        errorMessage: null,
       };
     },
-    inject: ["$graffiti", "$graffitiSession"],
+    inject: {
+      $graffiti: { default: null },
+      $graffitiSession: { default: null },
+    },
     created() {
-      this.checkSolidLogin();
+      this.loadProfileFromStorage();
+      this.loadProfileFromGraffiti();
+    },
+    computed: {
+      isLoggedIn() {
+        return this.$graffitiSession && this.$graffitiSession.value;
+      },
+      username() {
+        if (!this.$graffitiSession || !this.$graffitiSession.value) {
+          return "Guest";
+        }
+
+        const actorId = this.$graffitiSession.value.actor;
+        if (actorId) {
+          const parts = actorId.split("/");
+          if (parts.length > 0) {
+            return parts[parts.length - 1];
+          }
+        }
+
+        return "Guest";
+      },
     },
     methods: {
-      loadProfile() {
-        const savedProfile = localStorage.getItem('userProfile');
-        if (savedProfile) {
-          return JSON.parse(savedProfile);
-        } else {
-          return {
-            name: "pigeon pigeon",
-            email: "pigeonandplans@gmail.com",
-            memberSince: "since the ice age",
-            bio: "bleh",
-            avatarUrl: "pidove.png"
-          };
+      loadProfileFromStorage() {
+        try {
+          const savedProfile = localStorage.getItem("userProfile");
+          if (savedProfile) {
+            this.profile = JSON.parse(savedProfile);
+          }
+        } catch (err) {
+          console.error("Error loading profile from localStorage:", err);
+        }
+      },
+      async loadProfileFromGraffiti() {
+        if (
+          !this.$graffiti ||
+          !this.$graffitiSession ||
+          !this.$graffitiSession.value
+        ) {
+          console.log("Not logged in or Graffiti not available");
+          return;
+        }
+
+        try {
+          const actorId = this.$graffitiSession.value.actor;
+          console.log("Looking for profile with actor ID:", actorId);
+
+          const discoveredProfiles = await this.$graffiti.discover({
+            channels: ["designftw-2025-studio2", "pigeon-app-profiles"],
+            where: (profile) =>
+              profile.value && profile.value.describes === actorId,
+          });
+
+          console.log("Discovered profiles:", discoveredProfiles);
+
+          if (discoveredProfiles && discoveredProfiles.length > 0) {
+            const latestProfile = discoveredProfiles[0].value;
+
+            this.profile = {
+              name: latestProfile.name || this.profile.name,
+              email: latestProfile.email || this.profile.email,
+              bio: latestProfile.bio || this.profile.bio,
+              memberSince:
+                latestProfile.memberSince || this.profile.memberSince,
+              avatarUrl: latestProfile.avatarUrl || this.profile.avatarUrl,
+            };
+
+            localStorage.setItem("userProfile", JSON.stringify(this.profile));
+            console.log("Profile loaded from Graffiti");
+          }
+        } catch (err) {
+          console.error("Error loading profile from Graffiti:", err);
         }
       },
       startEditing() {
@@ -41,17 +108,17 @@ export async function Profile() {
       handleImageUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
-        
-        if (!file.type.match('image.*')) {
-          alert('please select an image file');
+
+        if (!file.type.match("image.*")) {
+          alert("please select an image file");
           return;
         }
-        
+
         if (file.size > 5 * 1024 * 1024) {
-          alert('image size should be less than 5mb');
+          alert("image size should be less than 5mb");
           return;
         }
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
           this.previewImage = e.target.result;
@@ -60,118 +127,130 @@ export async function Profile() {
       },
       cancelImageUpload() {
         this.previewImage = null;
-        document.getElementById('profile-pic-input').value = '';
+        const input = document.getElementById("profile-pic-input");
+        if (input) input.value = "";
       },
       async saveProfile() {
-        this.profile = { ...this.editedProfile };
-        
-        if (this.previewImage) {
-          this.profile.avatarUrl = this.previewImage;
-        }
-        
-        localStorage.setItem('userProfile', JSON.stringify(this.profile));
-        
-        if (this.solidLoggedIn) {
-          await this.saveToGraffiti();
-        }
-        
-        this.editing = false;
-        this.previewImage = null;
-        
-        alert("profile updated");
-      },
-      async checkSolidLogin() {
-        if (this.$graffitiSession && this.$graffitiSession.value && this.$graffitiSession.value.actor) {
-          this.solidLoggedIn = true;
-          await this.loadFromGraffiti();
-        }
-      },
-      async saveToGraffiti() {
         try {
-          if (!this.$graffiti || !this.$graffitiSession.value || !this.$graffitiSession.value.actor) {
-            console.warn("not logged in with solid, skipping graffiti profile save");
-            return;
+          this.profile = { ...this.editedProfile };
+
+          if (this.previewImage) {
+            this.profile.avatarUrl = this.previewImage;
           }
 
-          const profileData = {
-            value: {
-              name: this.profile.name,
-              email: this.profile.email, 
-              bio: this.profile.bio,
-              memberSince: this.profile.memberSince,
-              avatarUrl: this.profile.avatarUrl,
-              generator: "https://banh-alvin.github.io/",
-              describes: this.$graffitiSession.value.actor
-            },
-            channels: [
-              "designftw-2025-studio2",
-              "pigeon-app-profiles"
-            ]
-          };
+          localStorage.setItem("userProfile", JSON.stringify(this.profile));
 
-          await this.$graffiti.publish(profileData);
-          console.log("profile saved to graffiti");
-        } catch (err) {
-          console.error("error saving profile to graffiti:", err);
-        }
-      },
-      async loadFromGraffiti() {
-        try {
-          if (!this.$graffiti || !this.$graffitiSession.value || !this.$graffitiSession.value.actor) {
-            return;
+          if (this.isLoggedIn && this.$graffiti) {
+            try {
+              await this.saveProfileToGraffiti();
+            } catch (err) {
+              console.error("Error saving to Graffiti:", err);
+            }
           }
 
-          const discoveredProfiles = await this.$graffiti.discover({
-            channels: ["designftw-2025-studio2", "pigeon-app-profiles"],
-            where: profile => 
-              profile.value.describes === this.$graffitiSession.value.actor
-          });
+          this.editing = false;
+          this.previewImage = null;
 
-          if (discoveredProfiles && discoveredProfiles.length > 0) {
-            const latestProfile = discoveredProfiles[0].value;
-            
-            this.profile = {
-              name: latestProfile.name || this.profile.name,
-              email: latestProfile.email || this.profile.email,
-              bio: latestProfile.bio || this.profile.bio,
-              memberSince: latestProfile.memberSince || this.profile.memberSince,
-              avatarUrl: latestProfile.avatarUrl || this.profile.avatarUrl
-            };
-            
-            localStorage.setItem('userProfile', JSON.stringify(this.profile));
-            console.log("profile loaded from graffiti");
-          }
+          alert("profile updated");
         } catch (err) {
-          console.error("error loading profile from graffiti:", err);
+          console.error("Error saving profile:", err);
+          this.errorMessage =
+            "Failed to save profile: " + (err.message || "Unknown error");
         }
       },
-      async loginWithSolid() {
+      async saveProfileToGraffiti() {
+        if (
+          !this.$graffiti ||
+          !this.$graffitiSession ||
+          !this.$graffitiSession.value
+        ) {
+          console.warn("Not logged in, skipping Graffiti profile save");
+          return;
+        }
+
+        const actorId = this.$graffitiSession.value.actor;
+
+        const profileData = {
+          value: {
+            name: this.profile.name,
+            email: this.profile.email,
+            bio: this.profile.bio,
+            memberSince: this.profile.memberSince,
+            avatarUrl: this.profile.avatarUrl,
+            generator: window.location.origin,
+            describes: actorId,
+          },
+          channels: ["designftw-2025-studio2", "pigeon-app-profiles"],
+        };
+
         try {
-          if (!this.$graffiti) {
-            console.error("graffiti not available");
-            return;
-          }
-          
-          await this.$graffiti.login();
-          this.solidLoggedIn = true;
-          await this.loadFromGraffiti();
+          await this.$graffiti.put(profileData, this.$graffitiSession.value);
+          console.log("Profile saved to Graffiti");
         } catch (err) {
-          console.error("error logging in with solid:", err);
+          console.error("Error saving profile to Graffiti:", err);
+          throw err;
         }
       },
-      async logoutFromSolid() {
-        try {
-          if (!this.$graffiti) {
-            return;
-          }
-          
-          await this.$graffiti.logout();
-          this.solidLoggedIn = false;
-        } catch (err) {
-          console.error("error logging out from solid:", err);
-        }
-      }
     },
-    template: await fetch("./profile.html").then((r) => r.text()),
+    template: `
+    <div class="profile-container">
+      <h2>user profile</h2>
+      
+      <div v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </div>
+      
+      <div v-if="!editing" class="profile-view">
+        <img :src="profile.avatarUrl || 'https://via.placeholder.com/150'" alt="profile picture" class="profile-pic">
+        <div class="profile-details">
+          <h3>{{ profile.name }}</h3>
+          <p>{{ profile.email }}</p>
+          <p>member since: {{ profile.memberSince }}</p>
+          <p v-if="profile.bio">{{ profile.bio }}</p>
+        </div>
+        <div class="profile-actions">
+          <button @click="startEditing" class="edit-button">edit profile</button>
+        </div>
+      </div>
+      
+      <form v-else @submit.prevent="saveProfile" class="profile-form">
+        <div class="form-group profile-pic-upload">
+          <img :src="previewImage || editedProfile.avatarUrl || 'https://via.placeholder.com/150'" alt="profile picture" class="profile-pic">
+          <div class="upload-controls">
+            <label for="profile-pic-input" class="upload-button">
+              choose photo
+              <input 
+                type="file" 
+                id="profile-pic-input" 
+                @change="handleImageUpload" 
+                accept="image/*"
+                style="display: none;">
+            </label>
+            <button type="button" v-if="previewImage" @click="cancelImageUpload" class="cancel-upload-button">remove</button>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="name">name</label>
+          <input type="text" id="name" v-model="editedProfile.name" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">email</label>
+          <input type="email" id="email" v-model="editedProfile.email" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="bio">bio</label>
+          <textarea id="bio" v-model="editedProfile.bio" rows="3"></textarea>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="save-button">save changes</button>
+          <button type="button" @click="cancelEditing" class="cancel-button">cancel</button>
+        </div>
+      </form>
+    </div>
+    `,
   };
 }

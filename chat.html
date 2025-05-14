@@ -2,49 +2,68 @@
   <div class="main-content">
     <div class="chat-container">
       <h2>chat {{ chatId }}</h2>
-      
-      <div v-if="loading" class="loading-indicator">
-        loading messages...
-      </div>
-      
-      <graffiti-discover 
+
+      <div v-if="loading" class="loading-indicator">loading messages...</div>
+
+      <graffiti-discover
         autopoll
-        :channels="['designftw-2025-studio2', `pigeon-chat-${chatId}`]" 
+        :channels="['designftw-2025-studio2', `pigeon-chat-${chatId}`]"
         :where="msg => msg.value && msg.value.chatId === chatId"
         :order-by="item => item.value.id"
-        @data="handleGraffitiMessages">
-        
+        @data="handleGraffitiMessages"
+      >
         <div class="messages-container" ref="messagesContainer">
           <div v-if="messages.length === 0" class="empty-chat">
             <p>no messages yet</p>
           </div>
-          
+
           <div v-else class="message-list">
-            <div v-for="(message, index) in messages" :key="message.id" class="message" :class="{ 'my-message': message.sender === userName }">
+            <div
+              v-for="(message, index) in messages"
+              :key="message.id"
+              class="message"
+              :class="{ 'my-message': message.sender === userName }"
+            >
               <div class="message-header">
-                <span class="message-sender">{{ message.sender }}</span>
-                <span class="message-time">{{ message.timestamp }}</span>
-                <button @click="deleteMessage(index)" class="delete-message-btn">×</button>
+                <span class="message-sender">
+                  <b> {{ message.sender }} </b>
+                </span>
+                <br />
+                <span
+                  class="message-time"
+                  style="font-size: 0.75rem; color: #888"
+                  >{{ message.timestamp }}</span
+                >
               </div>
               <div class="message-text">{{ message.text }}</div>
+
+              <button @click="deleteMessage(index)" class="delete-message-btn">
+                ❌
+              </button>
+              <button
+                @click="addMessageToTodo(message)"
+                class="add-todo-btn"
+                title="Add to todo list"
+              >
+                📝 add todo
+              </button>
             </div>
           </div>
         </div>
       </graffiti-discover>
-      
+
       <div class="message-input">
-        <input 
-          type="text" 
-          v-model="newMessage" 
+        <input
+          type="text"
+          v-model="newMessage"
           @keyup.enter="sendMessage"
           placeholder="type your message..."
-        >
+        />
         <button @click="sendMessage">📨</button>
+        <button @click="$router.push('/')" class="home">
+          ⬅️ back to chats
+        </button>
       </div>
     </div>
-  </div>
-  
-  <div class="sidebar">
-    <todo></todo>
   </div>
 </div>

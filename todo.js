@@ -8,6 +8,7 @@ export async function Todo() {
         editValue: "",
       };
     },
+    inject: ["$router"],
     mounted() {
       this.loadTodos();
     },
@@ -60,6 +61,12 @@ export async function Todo() {
         const savedTodos = localStorage.getItem("todos");
         if (savedTodos) {
           this.todos = JSON.parse(savedTodos);
+        }
+      },
+
+      goToSource(source) {
+        if (source && source.type === "chat") {
+          this.$router.push(`/chat/${source.chatId}`);
         }
       },
     },
